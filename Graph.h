@@ -1,33 +1,40 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
-#include <list>
+#include <vector>
 #include <string>
+#include <unordered_map>
 
-struct Edge {
+class Node;
+
+class Edge {
 
     private: 
-    Node* fromNode; 
-    Node* toNode;
+    std::string toIP;
     double weight;
     bool online;
 
     public:
     Edge();
-    Edge(Node* fromNode, Node* toNode, double weight);
+    Edge(std::string toIP, double weight);
 
 };
 
-struct Node {
+class Node {
 
     private:
     std::string iPAddress;
     int nodeVal; 
-    std::list<Edge> edges;
+    std::vector<Edge> edges;
+    bool online;
 
     public:
     Node();
-    Node(int val, std::list<Edge> edges);
+    Node(int val);
+    Node(int val, std::string iPAddress);
+
+    void addEdge(std::string toIP, double weight);
+    void removeEdge(std::string toIP);
 
 };
 
@@ -35,7 +42,7 @@ class Graph {
     
     private:
     int numNodes;
-    std::list<Node&> nodeList;
+    std::unordered_map<std::string, Node*> nodeMap;
 
     public:
     Graph();
@@ -43,8 +50,11 @@ class Graph {
     int size();
     void printNodes();
 
-    void addNode();
-    void removeNode();
+    void addNode(int nodeVal, std::string iPAddress);
+    void removeNode(std::string iPAddress);
+
+    void addEdge(std::string fromIP, std::string toIP, double weight);
+    void removeEdge(std::string fromIP, std::string toIP, double weight);
 
 };
 
