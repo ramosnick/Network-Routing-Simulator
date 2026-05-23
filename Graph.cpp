@@ -20,8 +20,26 @@ Node::Node(int val, std::string iPAddress) {
     online = true;
 }
 
+std::string Node::getIP() const {
+    return this->iPAddress;
+}
+
 void Node::addEdge(std::string toIP, double weight) {
     edges.emplace_back(toIP, weight); //Emplace creates an Edge object for me with given parameters
+}
+
+void Node::removeEdge(std::string toIP) {
+
+    for(int i = 0; i < edges.size(); i++) {
+        if(edges[i].getToIP() == toIP) {
+            std::cout << "Deleted Edge:\n" << edges[i] << std::endl;
+            edges.erase(edges.begin() + i);
+            return;
+        }
+    }
+    std::cout << "No IPs matching " << toIP << "found..." << std::endl;
+    return;
+
 }
 
 std::vector<Edge>& Node::getEdges() {
@@ -31,9 +49,10 @@ std::vector<Edge>& Node::getEdges() {
 std::ostream& operator<<(std::ostream& os, const Node& node) {
     os << "IP Address: " << node.iPAddress << std::endl;
     os << "Connected to:\n" << std::endl;
-    for(int i; i < size(node.edges) ; i++) {
+    for(int i = 0; i < size(node.edges) ; i++) {
         os << node.edges[i] << std::endl;
     }
+    return os;
 }
 
 /*-----------Edge Methods:----------*/
@@ -50,13 +69,20 @@ Edge::Edge(std::string toIP, double weight) {
     online = true;
 };
 
-std::string Edge::getToIP() {
+std::string Edge::getToIP() const {
     return this->toIP;
+}
+
+void Edge::updateWeight(double newWeight) {
+
+    this->weight = newWeight;
+
 }
 
 std::ostream& operator<<(std::ostream& os, const Edge& edge) {
     os << "IP: " << edge.toIP << std::endl;
     os << "Latency (weight): " << edge.weight << std::endl;
+    return os;
 }
 
 /*-----------Graph Methods:----------*/
@@ -64,6 +90,20 @@ Graph::Graph() {
     numNodes = 0;
 };
 
+void Graph::printGraph() {
+    std::cout << "Nodes currently in graph:\n" << std::endl;
+    for(const auto& [nodeVal, nodePointer] : nodeMap) {
+        std::cout << "Node: " << nodeVal << " IP: " << nodePointer->getIP() << std::endl;
+        
+        if(nodePointer->getEdges().size() > 0) {
+            std::cout << "Connects to : " << std::endl;
+        }
+
+        for(const auto& edge : nodePointer->getEdges()) {
+            std::cout << edge << std::endl;
+        }
+    }
+}
 //Add node or edge
 void Graph::addNode(int nodeVal, std::string iPAddress) {
     Node* newNode = new Node(nodeVal, iPAddress);
@@ -73,16 +113,24 @@ void Graph::addNode(int nodeVal, std::string iPAddress) {
 }
 
 void Graph::addEdge(std::string fromIP, std::string toIP, double weight) {
+    //Guard clause to prevent the creation of a new Node in the below for loop...
+    if(nodeMap.count(fromIP) == 0 || nodeMap.count(toIP) == 0) {
+        std::cout << "Edge creation failed, one or more Nodes doesn't exist..." << std::endl;
+        return;
+    }
+    
+    //Guard clause to prevent the creation of duplicate Edges
+    for(const auto& edge : nodeMap[fromIP]->getEdges()) {
+        if(edge.getToIP() == toIP) {
+            std::cout << "Edge already exists, try updateEdge()\n" << std::endl;
+            return;
+        }
+    }
+    
     nodeMap[fromIP]->addEdge(toIP, weight);
     std::cout << "Edge added\nFrom IP: " << fromIP << std::endl;
     std::cout << "To IP: " << toIP << std::endl;
     return;
-}
-
-void Graph::removeEdge(std::string fromIP, std::string toIP, double weight) {
-
-
-
 }
 
 //Remove node or edge
@@ -91,23 +139,11 @@ void Graph::removeNode(std::string iPAddress) {
         std::cout << "Node not found..." << std::endl;
         return;
     }
-    //FIXME: Need to visit connecting Nodes and delete Edges leading to this Node before deleting the Node...
-    /*Copied from Gemini: Don't want to implement exactly like this,
-    just using it as an example 
     
-    // Inside your loop, targeting the neighbor's vector:
-neighborNode->edges.erase(
-    std::remove_if(neighborNode->edges.begin(), neighborNode->edges.end(),
-        [&deletedIP](const Edge& e) {
-            return e.targetIP == deletedIP;
-        }),
-    neighborNode->edges.end()
-);*/
     for(auto& edge : nodeMap[iPAddress]->getEdges()) {
 
-        if(edge.getToIP() == iPAddress) {
-            nodeMap[iPAddress]->getEdges().erase(edge);
-        }
+        Node* neighborNode = nodeMap[edge.getToIP()];
+        neighborNode->getEdges().erase(std::remove_if(neighborNode->getEdges().begin(), neighborNode->getEdges().end(), [&iPAddress](Edge& e) {return e.getToIP() == iPAddress;}), neighborNode->getEdges().end());
 
     }
 
@@ -116,3 +152,21 @@ neighborNode->edges.erase(
     this->numNodes--;
 }
 
+void Graph::removeEdge(std::string fromIP, std::string toIP) {
+
+    nodeMap[fromIP]->removeEdge(toIP);
+}
+
+void Graph::updateEdge(std::string fromIP, std::string toIP, double newWeight) {
+    if(nodeMap.count(fromIP) == 0 || nodeMap.count(toIP) == 0) {
+        std::cout << "Failed to update Edge, one or more Nodes don't exist" << std::endl;
+        return;
+    }
+    for(auto& edge : nodeMap[fromIP]->getEdges()) {
+        if(edge.getToIP() == toIP) {
+            edge.updateWeight(newWeight);
+            return;
+        }
+    }
+    std::cout << "Edge not found, nothing updated" << std::endl;
+}

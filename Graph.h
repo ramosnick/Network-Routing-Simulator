@@ -18,7 +18,8 @@ class Edge {
     Edge(); //Done
     Edge(std::string toIP, double weight); //Done
 
-    std::string getToIP(); //Done
+    std::string getToIP() const; //Done
+    void updateWeight(double newWeight); //Done
 
     friend std::ostream& operator<<(std::ostream& os, const Edge& edge); //Needs testing
 
@@ -35,12 +36,14 @@ class Node {
     public:
     Node(); //Needs testing
     Node(int val); //Needs testing
-    Node(int val, std::string iPAddress); //Needs testing
+    Node(int val, std::string iPAddress); //FUNCTIONAL
 
-    void addEdge(std::string toIP, double weight); //Needs testing
-    void removeEdge(std::string toIP); //Not started
+    std::string getIP() const; //FUNCTIONAL
 
-    std::vector<Edge>& getEdges(); //Needs testing
+    void addEdge(std::string toIP, double weight); //FUNCTIONAL
+    void removeEdge(std::string toIP); //FUNCTIONAL (Could refactor for loop to do away with indexing)
+
+    std::vector<Edge>& getEdges(); //FUNCTIONAL
 
     friend std::ostream& operator<<(std::ostream& os, const Node& node); //Needs testing
 
@@ -53,16 +56,18 @@ class Graph {
     std::unordered_map<std::string, Node*> nodeMap;
 
     public:
-    Graph(); //Done?
+    Graph(); //FUNCTIONAL
 
     int size(); //Not started
-    void printNodes(); //Not started
+    void printGraph(); //FUNCTIONAL
 
-    void addNode(int nodeVal, std::string iPAddress); //Needs testing
-    void removeNode(std::string iPAddress); //Work in Progress
+    void addNode(int nodeVal, std::string iPAddress); //FUNCTIONAL
+    void removeNode(std::string iPAddress); //FUNCTIONAL
 
-    void addEdge(std::string fromIP, std::string toIP, double weight); //Needs testing
-    void removeEdge(std::string fromIP, std::string toIP, double weight); //Not started
+    void addEdge(std::string fromIP, std::string toIP, double weight); //FUNCTIONAL
+    void removeEdge(std::string fromIP, std::string toIP); //FUNCTIONAL
+
+    void updateEdge(std::string fromIP, std::string toIP, double newWeight); //Work in progress
 
 };
 
