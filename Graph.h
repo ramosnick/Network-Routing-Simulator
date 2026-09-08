@@ -25,12 +25,38 @@ class Edge {
 
 };
 
+class LSA {
+
+    private:
+    int seqNum;
+    std::string fromIp;
+    std::vector<Edge> neighbors;
+
+    public:
+    //Constructors
+    LSA();
+    LSA(std::string fromIp);
+    LSA(int seqNum, std::string fromIp, std::vector<Edge> neighbors);
+
+    //Getters
+    int getSeqNum();
+    std::string getFromIp();
+    const std::vector<Edge>& getNeighbors();
+    
+    //Setters
+    void setSeqNumber(int seqNum);
+    void setFromIp(std::string fromIp);
+    void addNeighbor(Edge neighbor);
+
+};
+
 class Node {
 
     private:
     std::string iPAddress;
     int nodeVal; 
     std::vector<Edge> edges;
+    std::unordered_map<std::string, std::string> routingTable;
     bool online;
 
     public:
@@ -47,6 +73,8 @@ class Node {
 
     friend std::ostream& operator<<(std::ostream& os, const Node& node); //Needs testing
 
+    void updateRoutingTable();
+
 };
 
 class Graph {
@@ -58,6 +86,8 @@ class Graph {
     public:
     Graph(); //FUNCTIONAL
 
+    ~Graph(); //Destructor
+
     int size(); //Not started
     void printGraph(); //FUNCTIONAL
 
@@ -68,6 +98,10 @@ class Graph {
     void removeEdge(std::string fromIP, std::string toIP); //FUNCTIONAL
 
     void updateEdge(std::string fromIP, std::string toIP, double newWeight); //Work in progress
+
+    //THE FUN STUFF >:)
+
+    void updateRoutingTable(); //Work in progress
 
 };
 

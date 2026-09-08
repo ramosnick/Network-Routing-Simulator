@@ -25,7 +25,9 @@ std::string Node::getIP() const {
 }
 
 void Node::addEdge(std::string toIP, double weight) {
+
     edges.emplace_back(toIP, weight); //Emplace creates an Edge object for me with given parameters
+
 }
 
 void Node::removeEdge(std::string toIP) {
@@ -55,19 +57,27 @@ std::ostream& operator<<(std::ostream& os, const Node& node) {
     return os;
 }
 
+void Node::updateRoutingTable() {
+
+    for(int i=0; i < edges.size(); i++) {
+        if(edges[i])
+    }
+
+}
+
 /*-----------Edge Methods:----------*/
 
 Edge::Edge() {
     toIP =""; 
     weight = 0; 
     online = false;
-};
+}
 
 Edge::Edge(std::string toIP, double weight) {
     this->toIP = toIP;
     this->weight = weight;
     online = true;
-};
+}
 
 std::string Edge::getToIP() const {
     return this->toIP;
@@ -85,10 +95,59 @@ std::ostream& operator<<(std::ostream& os, const Edge& edge) {
     return os;
 }
 
+/*------------LSA Methods:-----------*/
+
+LSA::LSA() {
+
+    this->seqNum = 0;
+    this->fromIp = "";
+
+}
+
+LSA::LSA(std::string fromIp) {
+    
+    this->seqNum = 0;
+    this->fromIp = fromIp;
+
+}
+
+LSA::LSA(int seqNum, std::string fromIp, std::vector<Edge> neighbors) {
+
+        this->seqNum = seqNum;
+        this->fromIp = fromIp;
+        this->neighbors = neighbors;
+}
+
+int LSA::getSeqNum() {
+
+    return this->seqNum;
+
+}
+
+std::string LSA::getFromIp() {
+
+    return this->fromIp;
+
+}
+
+const std::vector<Edge>& LSA::getNeighbors() {
+
+    return this->neighbors;
+
+}
+
 /*-----------Graph Methods:----------*/
 Graph::Graph() {
     numNodes = 0;
-};
+}
+
+Graph::~Graph() {
+    for(auto& [iP, node] : nodeMap) {
+        if(node) {
+            delete node;
+        }
+    }
+}
 
 void Graph::printGraph() {
     std::cout << "Nodes currently in graph:\n" << std::endl;
