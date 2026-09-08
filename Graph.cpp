@@ -24,6 +24,10 @@ std::string Node::getIP() const {
     return this->iPAddress;
 }
 
+Graph& Node::getLocalGraph() {
+    return localGraph;
+}
+
 void Node::addEdge(std::string toIP, double weight) {
 
     edges.emplace_back(toIP, weight); //Emplace creates an Edge object for me with given parameters
@@ -48,6 +52,12 @@ std::vector<Edge>& Node::getEdges() {
         return edges;
     }
 
+void Node::updateEdges(std::vector<Edge> newEdges) {
+
+    this->edges = newEdges; //Turns edges into a copy of newEdges
+
+}
+
 std::ostream& operator<<(std::ostream& os, const Node& node) {
     os << "IP Address: " << node.iPAddress << std::endl;
     os << "Connected to:\n" << std::endl;
@@ -57,11 +67,26 @@ std::ostream& operator<<(std::ostream& os, const Node& node) {
     return os;
 }
 
+void Node::newLSA() {
+    LSA(this->currentSeqNum, this->iPAddress, edges);
+
+}
+
+void Node::receiveLSA(LSA lsa) {
+    //If newer LSA not received from this IP
+    if(lsa.getSeqNum() > sequenceTable[lsa.getFromIp()]) {
+        //FIXME: Update localMap with new data from LSA
+        getLocalGraph().getNodeMap()[lsa.getFromIp()]->updateEdges(lsa.getNeighbors());
+        //Don't forget to update sequence number table when new nodes are added.
+    } else {
+        return; //LSA is stale, exit fxn call.
+    }
+
+}
+
 void Node::updateRoutingTable() {
 
-    for(int i=0; i < edges.size(); i++) {
-        if(edges[i])
-    }
+    //Dijkstras implementation...
 
 }
 
@@ -133,6 +158,24 @@ std::string LSA::getFromIp() {
 const std::vector<Edge>& LSA::getNeighbors() {
 
     return this->neighbors;
+
+}
+
+void LSA::setSeqNumber(int seqNum) {
+
+    this->seqNum = seqNum;
+
+}
+
+void LSA::setFromIp(std::string fromIp) {
+
+    this->fromIp = fromIp;
+
+}
+
+void LSA::addNeighbor(Edge neighbor) {
+
+    this->neighbors.push_back(neighbor);
 
 }
 
@@ -209,6 +252,12 @@ void Graph::removeNode(std::string iPAddress) {
     delete nodeMap[iPAddress];    
     nodeMap.erase(iPAddress);
     this->numNodes--;
+}
+
+std::unordered_map<std::string, Node*>& Graph::getNodeMap() {
+
+    return nodeMap;
+
 }
 
 void Graph::removeEdge(std::string fromIP, std::string toIP) {

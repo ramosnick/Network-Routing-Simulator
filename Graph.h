@@ -55,9 +55,12 @@ class Node {
     private:
     std::string iPAddress;
     int nodeVal; 
+    int currentSeqNum;
+    std::unordered_map<std::string, int> sequenceTable;
     std::vector<Edge> edges;
     std::unordered_map<std::string, std::string> routingTable;
     bool online;
+    Graph localGraph;
 
     public:
     Node(); //Needs testing
@@ -65,14 +68,18 @@ class Node {
     Node(int val, std::string iPAddress); //FUNCTIONAL
 
     std::string getIP() const; //FUNCTIONAL
+    Graph& getLocalGraph();
 
     void addEdge(std::string toIP, double weight); //FUNCTIONAL
     void removeEdge(std::string toIP); //FUNCTIONAL (Could refactor for loop to do away with indexing)
 
     std::vector<Edge>& getEdges(); //FUNCTIONAL
+    void updateEdges(std::vector<Edge> newEdges);
 
     friend std::ostream& operator<<(std::ostream& os, const Node& node); //Needs testing
 
+    void newLSA();
+    void receiveLSA(LSA lsa);
     void updateRoutingTable();
 
 };
@@ -87,6 +94,8 @@ class Graph {
     Graph(); //FUNCTIONAL
 
     ~Graph(); //Destructor
+
+    std::unordered_map<std::string, Node*>& getNodeMap();
 
     int size(); //Not started
     void printGraph(); //FUNCTIONAL
